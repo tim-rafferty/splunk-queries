@@ -1,0 +1,777 @@
+-----------------------------------------------------
+=====================================================
+-----------------------------------------------------
+API Usage Dashboard
+-----------------------------------------------------
+  <option name="refresh.display">progressbar</option>
+  </single>
+  </panel>
+  <panel>
+  <single>
+  <title>Auth Server - API Usage - # of distinct users</title>
+  <search>
+  <query>index="blend*" "env"="prod" "kubernetes.container_name"="auth-server" | stats dc(parsed.apiUserId)</query>
+  <earliest>-6mon@mon</earliest>
+  <latest>now</latest>
+  </search>
+  <option name="drilldown">none</option>
+  </single>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <table>
+  <title>API Gateway - API Usage (distinct)</title>
+  <search>
+  <query>index="blend*" "body.service"="api-gateway" | stats dc(body.apiUserName) by body.userType, body.apiUserName, body.tenant</query>
+  <earliest>-6mon</earliest>
+  <latest>now</latest>
+  </search>
+  <option name="drilldown">none</option>
+  <option name="refresh.display">progressbar</option>
+  </table>
+  </panel>
+  <panel>
+  <table>
+  <title>API Gateway - API Usage (non-unique)</title>
+  <search>
+  <query>index="blend*" "body.service"="api-gateway" | stats count by body.userType, body.apiUserName, body.tenant</query>
+  <earliest>-6mon</earliest>
+  <latest>now</latest>
+  </search>
+  <option name="drilldown">none</option>
+  <option name="refresh.display">progressbar</option>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <table>
+  <title>Auth Server Prod (distinct)</title>
+  <search>
+  <query>index="blend*" "env"="prod" "kubernetes.container_name"="auth-server" | stats dc(parsed.apiUserId) by parsed.type, parsed.apiUserId, parsed.tenantId</query>
+  <earliest>-6mon</earliest>
+  <latest>now</latest>
+  </search>
+  <option name="drilldown">none</option>
+  <option name="refresh.display">progressbar</option>
+  </table>
+  </panel>
+  <panel>
+  <table>
+  <title>Auth Server Prod (non-unique)</title>
+  <search>
+  <query>index="blend*" "env"="prod" "kubernetes.container_name"="auth-server" | stats count by parsed.type, parsed.apiUserId, parsed.tenantId</query>
+  <earliest>-6mon</earliest>
+  <latest>now</latest>
+  </search>
+  <option name="drilldown">none</option>
+  <option name="refresh.display">progressbar</option>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <table>
+  <search>
+  <query>index="blend-sensitive-prod" "parsed.blendLogType"=authlog OR "parsed.blendLogType"=authLog "whitelisted"=true "parsed.remoteIP"="*" "parsed.code"=success | iplocation parsed.remoteIP | search Country!="United States" | stats count by parsed.tenantId, Country</query>
+  <earliest>-6mon</earliest>
+  <latest>now</latest>
+  <sampleRatio>1</sampleRatio>
+  </search>
+  <option name="count">20</option>
+  <option name="dataOverlayMode">none</option>
+  <option name="drilldown">none</option>
+  <option name="percentagesRow">false</option>
+  <option name="rowNumbers">false</option>
+  <option name="totalsRow">false</option>
+  <option name="wrap">true</option>
+  </table>
+  </panel>
+  </row>
+ </dashboard>
+ -----------------------------------------------------
+This dashboard provides a comprehensive view of API and authentication activities within a production environment:
+1. User Tracking – Measures distinct and total users for Auth Server and API Gateway.
+2. Traffic Analysis – Helps in identifying high-volume API users.
+3. Security Monitoring – Flags non-US authentication attempts that might indicate potential security concerns.
+4. Tenant Segmentation – Splits data by tenants for multi-tenant system monitoring.
+-----------------------------------------------------
+=====================================================
+-----------------------------------------------------
+CP Application Summary
+-----------------------------------------------------
+<form version="1.0" theme="dark">
+  <label>CP Application Summary</label>
+  <fieldset submitButton="false" autoRun="false">
+  <input type="dropdown" token="env">
+  <label>Filter</label>
+  <choice value="prod">Prod</choice>
+  <choice value="beta">Beta</choice>
+  <choice value="sandbox">Sandbox</choice>
+  <default>prod</default>
+  <initialValue>prod</initialValue>
+  </input>
+  <input type="text" token="applicationId" searchWhenChanged="true">
+  <label>Application ID</label>
+  </input>
+  <input type="time" token="time">
+  <label></label>
+  <default>
+  <earliest>-24h@h</earliest>
+  <latest>now</latest>
+  </default>
+  </input>
+  </fieldset>
+  <row>
+  <panel>
+  <title>Applications</title>
+  <input type="dropdown" token="tenant" searchWhenChanged="true">
+  <label>Tenant</label>
+  <default>*</default>
+  <fieldForLabel>parsed.tenant</fieldForLabel>
+  <fieldForValue>parsed.tenant</fieldForValue>
+  <search>
+  <query>env=$env$ kubernetes.container_name=configurable-products Created application | dedup parsed.tenant | table parsed.tenant</query>
+  <earliest>-24h@h</earliest>
+  <latest>now</latest>
+  </search>
+  </input>
+  <input type="dropdown" token="entryPoint" searchWhenChanged="true">
+  <label>Entry Point</label>
+  <default>*</default>
+  <fieldForLabel>parsed.entryPoint</fieldForLabel>
+  <fieldForValue>parsed.entryPoint</fieldForValue>
+  <search>
+  <query>env=$env$ kubernetes.container_name=configurable-products Created application | dedup parsed.entryPoint | table parsed.entryPoint</query>
+  <earliest>-24h@h</earliest>
+  <latest>now</latest>
+  </search>
+  </input>
+  <table>
+  <search>
+  <query>env=$env$ kubernetes.container_name=configurable-products $tenant$ $entryPoint$ "Created application"
+  | sort -time | table _time parsed.tenant parsed.entryPoint parsed.applicationId parsed.productId parsed.productVersionId</query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <option name="drilldown">cell</option>
+  <option name="refresh.display">progressbar</option>
+  <format type="color" field="parsed.tenant">
+  <colorPalette type="sharedList"></colorPalette>
+  <scale type="sharedCategory"></scale>
+  </format>
+  <drilldown>
+  <set token="form.applicationId">$row.parsed.applicationId$</set>
+  </drilldown>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Selected Application</title>
+  <table>
+  <search>
+  <query>env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Created application"
+  | sort -time | table _time parsed.tenant parsed.entryPoint parsed.applicationId parsed.productId parsed.productVersionId</query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <option name="count">1</option>
+  <option name="drilldown">cell</option>
+  <option name="refresh.display">progressbar</option>
+  <format type="color" field="parsed.tenant">
+  <colorPalette type="sharedList"></colorPalette>
+  <scale type="sharedCategory"></scale>
+  </format>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Application Logs</title>
+  <input type="dropdown" token="miscFilter" searchWhenChanged="true">
+  <label>Filter</label>
+  <choice value="">All</choice>
+  <choice value="HTTP">HTTP</choice>
+  <default></default>
+  </input>
+  <input type="dropdown" token="serviceFilter" searchWhenChanged="true">
+  <label>Services</label>
+  <choice value="">All</choice>
+  <choice value="kubernetes.container_name=configurable-products">configurable-products</choice>
+  <choice value="kubernetes.container_name=configurable-products-kafka-consumer">configurable-products-kafka-consumer</choice>
+  <choice value="kubernetes.container_name=home-insurance*">home-insurance</choice>
+  <default></default>
+  </input>
+  <table>
+  <search>
+  <query>env=$env$ $miscFilter$ $serviceFilter$ ($applicationId$ OR [search env=$env$ $applicationId$ | dedup parsed.dd.trace_id | fields parsed.dd.trace_id | format])
+  | sort -time
+  | table _time, kubernetes.container_name, parsed.message, parsed.dd.trace_id</query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <option name="drilldown">none</option>
+  <option name="refresh.display">progressbar</option>
+  <format type="color" field="kubernetes.container_name">
+  <colorPalette type="sharedList"></colorPalette>
+  <scale type="sharedCategory"></scale>
+  </format>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Consumer Nodes</title>
+  <input type="dropdown" token="nodeFilter" searchWhenChanged="true">
+  <label>Filter</label>
+  <choice value="(displayed OR traversed) node instance">All</choice>
+  <choice value="displayed node instance">Displayed</choice>
+  <choice value="traversed node instance">Traversed</choice>
+  <default>(displayed OR traversed) node instance</default>
+  </input>
+  <table>
+  <search>
+  <query>env=$env$ kubernetes.container_name=configurable-products $nodeFilter$ $applicationId$ NOT(parsed.applicationUserId=null) | rex field=parsed.message "(?&lt;action&gt;.*) node instance \((?&lt;nodeInstanceId&gt;.*), (?&lt;nodeName&gt;.*)\)" | sort -time | table _time nodeInstanceId action nodeName parsed.nodeType parsed.dd.trace_id</query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <option name="drilldown">none</option>
+  <format type="color" field="action">
+  <colorPalette type="map">{"Displayed":#1182F3,"Traversed":#55C169}</colorPalette>
+  </format>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Enterprise Nodes</title>
+  <input type="dropdown" token="nodeFilter" searchWhenChanged="true">
+  <label>Filter</label>
+  <choice value="(displayed OR traversed) node instance">All</choice>
+  <choice value="displayed node instance">Displayed</choice>
+  <choice value="traversed node instance">Traversed</choice>
+  <default>(displayed OR traversed) node instance</default>
+  </input>
+  <table>
+  <search>
+  <query>env=$env$ kubernetes.container_name=configurable-products $nodeFilter$ $applicationId$ parsed.applicationUserId=null | rex field=parsed.message "(?&lt;action&gt;.*) node instance \((?&lt;nodeInstanceId&gt;.*), (?&lt;nodeName&gt;.*)\)" | sort -time | table _time nodeInstanceId action nodeName parsed.nodeType parsed.dd.trace_id</query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <option name="drilldown">none</option>
+  <option name="refresh.display">progressbar</option>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Integration Nodes</title>
+  <table>
+  <search>
+  <query>env=$env$ kubernetes.container_name=configurable-products IntegrationNodeInstanceRunner "Starting Integration" parsed.applicationId=$applicationId$
+  | rex field=parsed.message "IntegrationNodeInstanceRunner \[(?&lt;nodeName&gt;.*)\]"
+  | join type=outer parsed.nodeInstanceId [
+  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ parsed.message="*Finished running with status*"
+  | rex field=parsed.message "Finished running with status - (?&lt;status&gt;[^ ]*)"
+  | rename status AS runStatus
+  | table parsed.nodeInstanceId runStatus parsed.duration parsed.errorMessage parsed.statusCode
+  ] 
+  | rename parsed.* AS *
+  | eval endpointGroup=endpointGroupName. "/" .endpointGroupVersion
+  | table _time, nodeInstanceId, nodeName, endpointGroup, endpointName, statusCode, duration, runStatus, errorMessage, dd.trace_id
+  </query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <option name="drilldown">cell</option>
+  <format type="color" field="statusCode">
+  <colorPalette type="list">[#53A051,#006D9C,#DC4E41]</colorPalette>
+  <scale type="threshold">299,399</scale>
+  </format>
+  <format type="color" field="sandboxError">
+  <colorPalette type="sharedList"></colorPalette>
+  <scale type="sharedCategory"></scale>
+  </format>
+  <format type="color" field="err">
+  <colorPalette type="map">{"Yes":#DC4E41}</colorPalette>
+  </format>
+  <format type="color" field="dataSaved">
+  <colorPalette type="expression">if (match(value,"Yes"), null, "#DC4E41")</colorPalette>
+  </format>
+  <format type="color" field="runStatus">
+  <colorPalette type="map">{"COMPLETED":#53A051,"ERROR":#DC4E41}</colorPalette>
+  </format>
+  <drilldown>
+  <condition field="dd.trace_id">
+  <link target="_blank">
+  <![CDATA[/app/search/cp_integration_nodes?form.env=$env$&form.traceId=$click.value2$]]>
+  </link>
+  </condition>
+  <condition></condition>
+  </drilldown>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Integration Nodes</title>
+  <table>
+  <search>
+  <query>env=$env$ kubernetes.container_name=configurable-products IntegrationNodeInstanceRunner "Starting Integration" parsed.applicationId=$applicationId$
+  | rex field=parsed.message "IntegrationNodeInstanceRunner \[(?&lt;nodeName&gt;.*)\]"
+  | join type=outer parsed.nodeInstanceId [
+  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Request body transformed"
+  | eval requestBodyTransformed = "Yes"
+  | table parsed.nodeInstanceId requestBodyTransformed
+  ]
+  | join type=outer parsed.nodeInstanceId [
+  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Sending request to product-boundary"
+  | eval sentToPBS = "Yes"
+  | table parsed.nodeInstanceId sentToPBS
+  ]
+  | join type=outer parsed.nodeInstanceId [
+  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Received response from product-boundary"
+  | eval responseFromPBS = "Yes"
+  | rex field=parsed.message "Received response from product-boundary (?&lt;reqStatusCode&gt;.*)"
+  | table parsed.nodeInstanceId responseFromPBS reqStatusCode parsed.duration
+  ]
+  | join type=outer parsed.nodeInstanceId [
+  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Response body transformed"
+  | eval responseBodyTransformed = "Yes"
+  | table parsed.nodeInstanceId responseBodyTransformed
+  ]
+  | join type=outer parsed.nodeInstanceId [
+  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Application data saved"
+  | eval dataSaved = "Yes"
+  | table parsed.nodeInstanceId dataSaved
+  ]
+  | join type=outer parsed.nodeInstanceId [
+  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ parsed.message="*Error during integration*"
+  | eval err = "Yes"
+  | table parsed.nodeInstanceId err
+  ]
+  | rename parsed.* AS *
+  | table _time, nodeName, endpointGroupName, endpointGroupVersion, endpointName, requestBodyTransformed, sentToPBS, responseFromPBS, reqStatusCode, err, responseBodyTransformed, dataSaved, duration, dd.trace_id
+  </query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <option name="drilldown">cell</option>
+  <format type="color" field="reqStatusCode">
+  <colorPalette type="list">[#53A051,#006D9C,#DC4E41]</colorPalette>
+  <scale type="threshold">299,399</scale>
+  </format>
+  <format type="color" field="sandboxError">
+  <colorPalette type="sharedList"></colorPalette>
+  <scale type="sharedCategory"></scale>
+  </format>
+  <format type="color" field="err">
+  <colorPalette type="map">{"Yes":#DC4E41}</colorPalette>
+  </format>
+  <format type="color" field="dataSaved">
+  <colorPalette type="expression">if (match(value,"Yes"), null, "#DC4E41")</colorPalette>
+  </format>
+  <drilldown>
+  <condition field="dd.trace_id">
+  <link target="_blank">
+  <![CDATA[/app/search/cp_integration_nodes?form.env=$env$&form.traceId=$click.value2$]]>
+  </link>
+  </condition>
+  <condition></condition>
+  </drilldown>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Beehive Events</title>
+  <table>
+  <search>
+  <query>env=$env$ kubernetes.container_name=configurable-products sent event $applicationId$ | sort -time | table _time parsed.message parsed.dd.trace_id</query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <option name="drilldown">none</option>
+  <option name="refresh.display">progressbar</option>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Public API Requests</title>
+  <table>
+  <search>
+  <query>env=$env$ kubernetes.container_name=api-gateway $applicationId$ NOT(proxying) | sort -time | table _time parsed.message parsed.dd.trace_id</query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <option name="drilldown">none</option>
+  <option name="refresh.display">progressbar</option>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Errors (WIP)</title>
+  <table>
+  <search>
+  <query>env=$env$ error ($applicationId$ OR [search env=$env$ $applicationId$ | dedup parsed.dd.trace_id | fields parsed.dd.trace_id | format]) parsed.message!="Configuration point not found*"
+  | sort -time
+  | table _time, kubernetes.container_name, parsed.message, parsed.err.message, parsed.dd.trace_id</query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <option name="count">5</option>
+  <option name="drilldown">none</option>
+  <option name="refresh.display">progressbar</option>
+  </table>
+  </panel>
+  </row>
+ </form>
+ -----------------------------------------------------
+ This CP Application Summary dashboard allows users to: 
+✅ Track applications created in different environments.
+✅ Filter logs and application details using various attributes.
+✅ Monitor consumer, enterprise, and integration nodes.
+✅ Detect errors and integration failures.
+✅ Analyze API requests and event logs.
+-----------------------------------------------------
+=====================================================
+-----------------------------------------------------
+[Disclosures] Package Creation
+ -----------------------------------------------------
+<form theme="dark" version="1.1">
+  <label>[Disclosures] Package Creation</label>
+  <fieldset submitButton="false">
+  <input type="time" token="time" searchWhenChanged="true">
+  <label>Global Time</label>
+  <default>
+  <earliest>-24h@h</earliest>
+  <latest>now</latest>
+  </default>
+  </input>
+  <input type="multiselect" token="env">
+  <label>Environments</label>
+  <choice value="prod">prod</choice>
+  <choice value="beta">beta</choice>
+  <choice value="sandbox">sandbox</choice>
+  <default>prod</default>
+  <initialValue>prod</initialValue>
+  </input>
+  <input type="multiselect" token="tenants">
+  <label>Tenants</label>
+  <fieldForLabel>tenant</fieldForLabel>
+  <fieldForValue>tenant</fieldForValue>
+  <search>
+  <query>index IN (blend-*-$env$*) env IN ($env$) parsed.tenant=* kubernetes.container_name=* | rename parsed.tenant as tenant | dedup tenant | table tenant | append [| makeresults 1 | eval tenant="*" | table tenant]</query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  </search>
+  <default>*</default>
+  <initialValue>*</initialValue>
+  <delimiter> </delimiter>
+  </input>
+  <input type="multiselect" token="status_code">
+  <label>Status Codes</label>
+  <choice value="&quot;5*&quot;">5xx</choice>
+  <choice value="&quot;4*&quot;">4xx</choice>
+  <choice value="&quot;3*&quot;">3xx</choice>
+  <choice value="&quot;2*&quot;">2xx</choice>
+  <choice value="&quot;1*&quot;">1xx</choice>
+  <default>"""5*""","""4*""","""3*""","""2*""","""1*"""</default>
+  <initialValue>"5*","4*","3*","2*","1*"</initialValue>
+  </input>
+  </fieldset>
+  <search id="base0">
+  <query>index IN (blend-*-$env$*) env IN ($env$) parsed.tenant IN ($tenants$) kubernetes.container_name="disclosures" parsed.message="Finished * with *." parsed.httpMethod="POST" parsed.originalUrl IN ("/api/disclosures", "/api/disclosures/", "/api/ops/disclosures", "/api/ops/disclosures/") | rex field=parsed.message "Finished (?&lt;route&gt;[\w,\/]+) with (?&lt;status_code&gt;[0-9]+)\." | spath output=tenant parsed.tenant | spath output=loanId parsed.loanId | spath output=apiRequestId parsed.apiRequestId | rename parsed._timestamp as timestampStr | eval timestamp=strptime(timestampStr,"%Y-%m-%dT%H:%M:%S.%6N") | eval status=case(status_code&lt;400, "ok", status_code&gt;=500, "5xx-error", status_code&gt;=400, "4xx-error") | fields *
+  </query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  <sampleRatio>1</sampleRatio>
+  </search>
+  <search id="base1" base="base0">
+  <query>| search status_code IN ($status_code$) | fields *
+  </query>
+  </search>
+  <row>
+  <panel depends="$alwaysHideCSS$" id="CSSPanel">
+  <html>
+  <style>
+  div#hideBufferTS td:last-child,
+  div#hideBufferTS th:last-child {
+  display:none;
+  }
+  #CSSPanel{
+  width:0% !important;
+  height:0% !important;
+  }
+  #smallerPanel{
+  width:30% !important;
+  }
+  #largerPanel{
+  width:70% !important;
+  }
+  </style>
+  </html>
+  </panel>
+  </row>
+  <row>
+  <panel id="smallerPanel">
+  <title>Requests Breakdown</title>
+  <chart>
+  <title># requests for env/status code</title>
+  <search base="base1">
+  <query>| eval env_code=env.": ".status_code | stats count by env_code</query>
+  </search>
+  <option name="charting.axisTitleX.visibility">collapsed</option>
+  <option name="charting.axisTitleY.visibility">collapsed</option>
+  <option name="charting.axisY.abbreviation">auto</option>
+  <option name="charting.chart">bar</option>
+  <option name="charting.chart.showDataLabels">all</option>
+  <option name="charting.chart.stackMode">default</option>
+  <option name="charting.drilldown">none</option>
+  <option name="charting.layout.splitSeries">0</option>
+  <option name="charting.legend.placement">none</option>
+  <option name="height">150</option>
+  <option name="refresh.display">progressbar</option>
+  </chart>
+  <chart>
+  <title>Ratio of requests for tenants/status code</title>
+  <search base="base1">
+  <query>| eval piece=tenant.": ".status_code | stats count by piece</query>
+  </search>
+  <option name="charting.axisTitleX.visibility">visible</option>
+  <option name="charting.axisTitleY.visibility">visible</option>
+  <option name="charting.axisTitleY2.visibility">visible</option>
+  <option name="charting.chart">pie</option>
+  <option name="charting.chart.sliceCollapsingThreshold">0.005</option>
+  <option name="charting.drilldown">all</option>
+  <option name="charting.legend.placement">right</option>
+  <option name="height">385</option>
+  <option name="refresh.display">progressbar</option>
+  <option name="trellis.enabled">0</option>
+  <option name="trellis.size">medium</option>
+  <drilldown>
+  <eval token="other">mvindex(split($click.value$," "), 0)</eval>
+  <eval token="form.tenants">case($other$=="other", "*", $other$!="other", mvindex(split($click.value$,":"), 0))</eval>
+  <eval token="astatus_code">case($other$=="other", ""5xx","4xx","3xx","2xx","1xx"", $other$!="other", mvindex(split($click.value$,":"), 1))</eval>
+  <eval token="form.status_code">case($other$=="other", "*", $other$!="other", mvindex(split($click.value$,":"), 1))</eval>
+  </drilldown>
+  </chart>
+  <chart>
+  <title>Ratio of requests for tenants</title>
+  <search base="base1">
+  <query>| eval piece=tenant | stats count by piece</query>
+  </search>
+  <option name="charting.chart">pie</option>
+  <option name="charting.chart.sliceCollapsingThreshold">0.005</option>
+  <option name="charting.drilldown">all</option>
+  <option name="height">385</option>
+  <option name="refresh.display">progressbar</option>
+  <drilldown>
+  <eval token="other">mvindex(split($click.value$," "), 0)</eval>
+  <eval token="form.tenants">case($other$=="other", "*", $other$!="other", $click.value$)</eval>
+  </drilldown>
+  </chart>
+  </panel>
+  <panel id="largerPanel">
+  <title>Status Codes Per Tenant per apiRequestId, loanId if available</title>
+  <table id="hideBufferTS">
+  <title>List of requests per loanId (Note: click loanId for payload)</title>
+  <search base="base1">
+  <query>| eval timestampLatest=timestamp+100000 | eval timestampEarliest=timestamp-100000 | eval ts=timestampEarliest." ".timestampLatest | eval loanId=coalesce(loanId, "") | stats latest(timestampStr) as latest_event, count, latest(ts) as ts by env, tenant, loanId, status_code | sort -count</query>
+  </search>
+  <option name="drilldown">cell</option>
+  <option name="refresh.display">progressbar</option>
+  <drilldown>
+  <condition match="$click.name2$ = &quot;loanId&quot;">
+  <eval token="buffer_tsA">mvindex(split($row.ts$," "), 0)</eval>
+  <eval token="buffer_tsB">mvindex(split($row.ts$," "), 1)</eval>
+  <link target="_blank">/app/search/disclosures_package_creation_payload_for_loan?form.loan_id=$row.loanId$&amp;form.env=$row.env$&amp;form.global_time.earliest=$buffer_tsA$&amp;form.global_time.latest=$buffer_tsB$</link>
+  </condition>
+  <condition field="*">
+  <eval token="buffer_tsA">mvindex(split($row.ts$," "), 0)</eval>
+  <eval token="buffer_tsB">mvindex(split($row.ts$," "), 1)</eval>
+  <link target="_blank">/app/search/disclosures_package_creation_payload_for_loan?form.loan_id=$row.loanId$&amp;form.env=$row.env$&amp;form.global_time.earliest=$buffer_tsA$&amp;form.global_time.latest=$buffer_tsB$</link>
+  </condition>
+  </drilldown>
+  </table>
+  <table>
+  <title>List of requests' status codes (***Note: click loanId for payload, or anywhere else on the row for request logs. "count" may be inflated due to duplicated ingestion***)</title>
+  <search base="base1">
+  <query>| eval loanId=coalesce(loanId, "") | stats count by _time, env, tenant, apiRequestId, loanId, status_code | sort -count, -_time</query>
+  </search>
+  <option name="count">20</option>
+  <option name="drilldown">cell</option>
+  <option name="percentagesRow">false</option>
+  <option name="refresh.display">progressbar</option>
+  <option name="totalsRow">false</option>
+  <drilldown>
+  <condition match="$click.name2$ != &quot;loanId&quot; AND $row.status_code$ &lt; &quot;400&quot;">
+  <link target="_blank">/app/search/apirequestid_logs?form.env=$row.env$&amp;form.apiRequestId=$row.apiRequestId$&amp;form.level=error&amp;form.level=warn&amp;form.level=info&amp;form.level=debug&amp;form.time.earliest=$time.earliest$&amp;form.time.latest=$time.latest$</link>
+  </condition>
+  <condition match="$click.name2$ != &quot;loanId&quot;">
+  <link target="_blank">/app/search/apirequestid_logs?form.env=$row.env$&amp;form.apiRequestId=$row.apiRequestId$&amp;form.level=error&amp;form.time.earliest=$time.earliest$&amp;form.time.latest=$time.latest$</link>
+  </condition>
+  <condition match="$click.name2$ = &quot;loanId&quot;">
+  <link target="_blank">/app/search/disclosures_package_creation_payload_for_loan?form.loan_id=$row.loanId$&amp;form.apiRequestId=$row.apiRequestId$&amp;form.env=$row.env$&amp;form.global_time.earliest=$time.earliest$&amp;form.global_time.latest=$time.latest$</link>
+  </condition>
+  <condition field="*"/>
+  </drilldown>
+  </table>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Status Codes Trends</title>
+  <chart>
+  <title>Trend of requests for tenants/status code</title>
+  <search base="base1">
+  <query>| eval piece=tenant.": ".status_code | timechart count by piece</query>
+  </search>
+  <option name="charting.axisY.abbreviation">none</option>
+  <option name="charting.axisY.scale">linear</option>
+  <option name="charting.chart">line</option>
+  <option name="charting.chart.showDataLabels">minmax</option>
+  <option name="charting.drilldown">none</option>
+  <option name="charting.layout.splitSeries">0</option>
+  <option name="charting.legend.mode">standard</option>
+  <option name="charting.legend.placement">bottom</option>
+  <option name="height">426</option>
+  </chart>
+  <chart>
+  <title>Trend of requests for loanId/status code</title>
+  <search base="base1">
+  <query>| eval piece=loanId.": ".status_code | timechart count by piece</query>
+  </search>
+  <option name="charting.chart">line</option>
+  <option name="charting.drilldown">none</option>
+  <option name="charting.legend.placement">bottom</option>
+  </chart>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Disclosures Create Packages Requests - # of Success vs Failures on Unique Loans per 5m span (Note: status multiselect has no effect for this chart)</title>
+  <chart>
+  <title>Trends for # unique loans (per success vs error status) returned from the Disclosures create packages API (scale: left == errors, right == successes)</title>
+  <search base="base0">
+  <query>| search loanId=* | timechart span=5m dc(loanId) by status</query>
+  </search>
+  <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+  <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+  <option name="charting.axisTitleX.visibility">visible</option>
+  <option name="charting.axisTitleY.text"># unique loans</option>
+  <option name="charting.axisTitleY.visibility">visible</option>
+  <option name="charting.axisTitleY2.visibility">visible</option>
+  <option name="charting.axisX.abbreviation">none</option>
+  <option name="charting.axisX.scale">linear</option>
+  <option name="charting.axisY.abbreviation">none</option>
+  <option name="charting.axisY.scale">linear</option>
+  <option name="charting.axisY2.abbreviation">auto</option>
+  <option name="charting.axisY2.enabled">1</option>
+  <option name="charting.axisY2.scale">inherit</option>
+  <option name="charting.chart">column</option>
+  <option name="charting.chart.bubbleMaximumSize">50</option>
+  <option name="charting.chart.bubbleMinimumSize">10</option>
+  <option name="charting.chart.bubbleSizeBy">area</option>
+  <option name="charting.chart.nullValueMode">gaps</option>
+  <option name="charting.chart.overlayFields">ok</option>
+  <option name="charting.chart.showDataLabels">none</option>
+  <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+  <option name="charting.chart.stackMode">stacked</option>
+  <option name="charting.chart.style">shiny</option>
+  <option name="charting.drilldown">none</option>
+  <option name="charting.layout.splitSeries">0</option>
+  <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+  <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+  <option name="charting.legend.mode">standard</option>
+  <option name="charting.legend.placement">bottom</option>
+  <option name="charting.lineWidth">2</option>
+  <option name="height">491</option>
+  <option name="refresh.display">progressbar</option>
+  <option name="trellis.enabled">0</option>
+  <option name="trellis.scales.shared">1</option>
+  <option name="trellis.size">medium</option>
+  </chart>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Disclosures Create Packages Requests - # of Success vs Failures on Unique Tenants per 5m span (Note: status multiselect has no effect for this chart)</title>
+  <chart>
+  <title>Trends for # unique *selected* tenants (per success vs error status) returned from the Disclosures create packages API (scale: left == errors, right == successes)</title>
+  <search base="base0">
+  <query>| search tenant=* | timechart span=5m dc(tenant) by status</query>
+  </search>
+  <option name="charting.axisTitleY.text"># unique tenants</option>
+  <option name="charting.axisY2.abbreviation">auto</option>
+  <option name="charting.axisY2.enabled">1</option>
+  <option name="charting.chart">column</option>
+  <option name="charting.chart.overlayFields">ok</option>
+  <option name="charting.drilldown">none</option>
+  <option name="charting.legend.placement">bottom</option>
+  <option name="refresh.display">progressbar</option>
+  <option name="height">491</option>
+  </chart>
+  </panel>
+  </row>
+  <row>
+  <panel>
+  <title>Create Package API Requests per Service per Tenants</title>
+  <chart>
+  <search>
+  <query>index IN (blend-*-$env$*) env IN ($env$) parsed.tenant IN ($tenants$) kubernetes.container_name="api-gateway" parsed.message="Returning *" parsed.httpMethod=POST parsed.originalUrl IN ("/disclosures-packages","/disclosures-packages/", "/packages") | spath output=container kubernetes.container_name | spath output=url parsed.originalUrl | rex field=url mode=sed "s/^\/disclosures-packages$$/\/disclosures-packages\//g" | eval endpt=container.": ".url | append [search index IN (blend-*-$env$*) env IN ($env$) parsed.tenant IN ($tenants$) kubernetes.container_name="blend*" parsed.message="Finished * with *." parsed.httpMethod="POST" parsed.originalUrl IN ("/api/disclosures", "/api/disclosures/", "/api/ops/disclosures", "/api/ops/disclosures/") | spath output=container kubernetes.container_name | spath output=url parsed.originalUrl | eval endpt=container.": ".url] | append [search index IN (blend-*-$env$*) env IN ($env$) parsed.tenant IN ($tenants$) kubernetes.container_name="disclosures" parsed.message="Finished * with *." parsed.httpMethod="POST" parsed.originalUrl IN ("/api/disclosures", "/api/disclosures/", "/api/ops/disclosures", "/api/ops/disclosures/") | spath output=container kubernetes.container_name | spath output=url parsed.originalUrl | rex field=url mode=sed "s/disclosures$$/disclosures\//g" | eval endpt=container.": ".url] | append [search index IN (blend-*-$env$*) env IN ($env$) parsed.tenant IN ($tenants$) kubernetes.container_name="blend*" parsed.httpMethod="POST" parsed.originalUrl IN ("/api/external/disclosures-packages") "parsed.message"="Received POST /disclosures-packages request" | spath output=container kubernetes.container_name | spath output=url parsed.originalUrl | rex field=url mode=sed "s/packages$$/packages\//g" | eval endpt=container.": ".url] | timechart count by endpt</query>
+  <earliest>$time.earliest$</earliest>
+  <latest>$time.latest$</latest>
+  <sampleRatio>1</sampleRatio>
+  </search>
+  <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+  <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+  <option name="charting.axisTitleX.visibility">visible</option>
+  <option name="charting.axisTitleY.visibility">visible</option>
+  <option name="charting.axisTitleY2.visibility">visible</option>
+  <option name="charting.axisX.abbreviation">none</option>
+  <option name="charting.axisX.scale">linear</option>
+  <option name="charting.axisY.abbreviation">none</option>
+  <option name="charting.axisY.scale">linear</option>
+  <option name="charting.axisY2.abbreviation">none</option>
+  <option name="charting.axisY2.enabled">0</option>
+  <option name="charting.axisY2.scale">inherit</option>
+  <option name="charting.chart">line</option>
+  <option name="charting.chart.bubbleMaximumSize">50</option>
+  <option name="charting.chart.bubbleMinimumSize">10</option>
+  <option name="charting.chart.bubbleSizeBy">area</option>
+  <option name="charting.chart.nullValueMode">gaps</option>
+  <option name="charting.chart.showDataLabels">minmax</option>
+  <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+  <option name="charting.chart.stackMode">default</option>
+  <option name="charting.chart.style">shiny</option>
+  <option name="charting.drilldown">none</option>
+  <option name="charting.layout.splitSeries">0</option>
+  <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+  <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+  <option name="charting.legend.mode">standard</option>
+  <option name="charting.legend.placement">bottom</option>
+  <option name="charting.lineWidth">2</option>
+  <option name="height">418</option>
+  <option name="refresh.display">progressbar</option>
+  <option name="trellis.enabled">0</option>
+  <option name="trellis.scales.shared">1</option>
+  <option name="trellis.size">medium</option>
+  </chart>
+  </panel>
+  </row>
+ </form>
+ -----------------------------------------------------
+1. The dashboard monitors API request activity for disclosure package creation.
+2. It categorizes requests by status codes, environments, tenants, and endpoints.
+3. It provides real-time and historical trends of success vs failure rates.
+4. Offers drilldowns to investigate API logs and request payloads.
+5. Helps diagnose API performance issues (e.g., high error rates, tenant-specific failures).
+6. Tracks unique loans and tenants affected by API issues.
+-----------------------------------------------------
+=====================================================
+-----------------------------------------------------
