@@ -1,6 +1,4 @@
 -----------------------------------------------------
-=====================================================
------------------------------------------------------
 WF Package Completed Delays
 -----------------------------------------------------
 index=blend-sensitive-prod parsed.tenant=wellsfargo 
@@ -42,7 +40,7 @@ AND isnull(Package_Cancelled) AND Package_Signed<HourAgo AND Package_Viewed<Hour
 6. Outputs a report with loan ID, package ID, timestamps, and delay duration.
 This query helps in identifying workflow bottlenecks where closing packages are getting stuck after signing and viewing. 
 -----------------------------------------------------
-=====================================================
+
 -----------------------------------------------------
 WF Submitted Apps Not Exported
 -----------------------------------------------------
@@ -65,7 +63,7 @@ WF Submitted Apps Not Exported
 🔹 It then filters out loans that either failed to export or took longer than 4 hours.
 🔹 The final output presents only the Loan UUID, export timestamps, and export duration.
 -----------------------------------------------------
-=====================================================
+
 -----------------------------------------------------
 US Bank Mobile Screenshot 
 -----------------------------------------------------
@@ -86,7 +84,7 @@ index=blend-sensitive-prod (kubernetes.container_name=disclosures OR kubernetes.
 4. Ensures only unique documents are included in the results.
 5. Sorts the documents by timestamp, showing the most recent ones first.
 -----------------------------------------------------
-=====================================================
+
 -----------------------------------------------------
 WF CRV Integration Failures
 -----------------------------------------------------
@@ -104,7 +102,7 @@ parsed.status as err_code, parsed.message as err_msg, parsed.name as err_name
 3. Matches these errors with specific mTLS validation failures from another set of logs (via subsearch).
 4. Extracts relevant fields, renames them for clarity, and displays them in a structured table.
 -----------------------------------------------------
-=====================================================
+
 -----------------------------------------------------
 US Bank Package Failed Creation
 -----------------------------------------------------
@@ -119,7 +117,7 @@ index=blend-sensitive-prod-blend-bailey-web parsed.task.processId="Disclosures*"
     -----------------------------------------------------
     The query provides a list of loan requests where disclosure package creation failed, along with relevant details like loan ID, envelope ID, and request ID. It ensures that only failed packages (as identified by the subsearch) are included.
 -----------------------------------------------------
-=====================================================
+
 -----------------------------------------------------
 Mr Cooper mrcCustomerId Failed
 -----------------------------------------------------
@@ -136,7 +134,7 @@ parsed.tenant=mrcooper kubernetes.container_name=blend-bailey-web
 3. It extracts the partyId (UUID format) from the API request URL.
 4. It removes duplicates and presents a clean output showing loan ID, borrower ID, error message, and timestamp.
 -----------------------------------------------------
-=====================================================
+
 -----------------------------------------------------
 Keybank ESOCKETTIMEDOUT
 -----------------------------------------------------
@@ -152,6 +150,4 @@ index="blend-sensitive-prod" ESOCKETTIMEDOUT parsed.tenant=key parsed.details.ev
 4. Removes duplicate loan IDs to prevent multiple entries for the same loan.
 5. Renames fields to make the results more readable.
 6. Displays the final output in a table format with relevant details.
------------------------------------------------------
-=====================================================
 -----------------------------------------------------
