@@ -1,6 +1,4 @@
 -----------------------------------------------------
-=====================================================
------------------------------------------------------
 API Usage Dashboard
 -----------------------------------------------------
   <option name="refresh.display">progressbar</option>
@@ -97,7 +95,7 @@ This dashboard provides a comprehensive view of API and authentication activitie
 3. Security Monitoring – Flags non-US authentication attempts that might indicate potential security concerns.
 4. Tenant Segmentation – Splits data by tenants for multi-tenant system monitoring.
 -----------------------------------------------------
-=====================================================
+
 -----------------------------------------------------
 CP Application Summary
 -----------------------------------------------------
@@ -432,13 +430,13 @@ CP Application Summary
  </form>
  -----------------------------------------------------
  This CP Application Summary dashboard allows users to: 
-✅ Track applications created in different environments.
-✅ Filter logs and application details using various attributes.
-✅ Monitor consumer, enterprise, and integration nodes.
-✅ Detect errors and integration failures.
-✅ Analyze API requests and event logs.
+- Track applications created in different environments.
+- Filter logs and application details using various attributes.
+- Monitor consumer, enterprise, and integration nodes.
+- Detect errors and integration failures.
+- Analyze API requests and event logs.
 -----------------------------------------------------
-=====================================================
+
 -----------------------------------------------------
 [Disclosures] Package Creation
  -----------------------------------------------------
@@ -766,12 +764,10 @@ CP Application Summary
   </row>
  </form>
  -----------------------------------------------------
-1. The dashboard monitors API request activity for disclosure package creation.
-2. It categorizes requests by status codes, environments, tenants, and endpoints.
-3. It provides real-time and historical trends of success vs failure rates.
-4. Offers drilldowns to investigate API logs and request payloads.
-5. Helps diagnose API performance issues (e.g., high error rates, tenant-specific failures).
-6. Tracks unique loans and tenants affected by API issues.
------------------------------------------------------
-=====================================================
+- The dashboard monitors API request activity for disclosure package creation.
+- It categorizes requests by status codes, environments, tenants, and endpoints.
+- It provides real-time and historical trends of success vs failure rates.
+- Offers drilldowns to investigate API logs and request payloads.
+- Helps diagnose API performance issues.
+- Tracks loans and tenants affected by API issues.
 -----------------------------------------------------
