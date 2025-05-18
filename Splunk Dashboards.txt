@@ -8,7 +8,7 @@ API Usage Dashboard
   <single>
   <title>Auth Server - API Usage - # of distinct users</title>
   <search>
-  <query>index="blend*" "env"="prod" "kubernetes.container_name"="auth-server" | stats dc(parsed.apiUserId)</query>
+  <query>index="blend*" "env"="Test" "kubernetes.container_name"="auth-server" | stats dc(parsed.apiUserId)</query>
   <earliest>-6mon@mon</earliest>
   <latest>now</latest>
   </search>
@@ -45,9 +45,9 @@ API Usage Dashboard
   <row>
   <panel>
   <table>
-  <title>Auth Server Prod (distinct)</title>
+  <title>Auth Server Test (distinct)</title>
   <search>
-  <query>index="blend*" "env"="prod" "kubernetes.container_name"="auth-server" | stats dc(parsed.apiUserId) by parsed.type, parsed.apiUserId, parsed.tenantId</query>
+  <query>index="blend*" "env"="Test" "kubernetes.container_name"="auth-server" | stats dc(parsed.apiUserId) by parsed.type, parsed.apiUserId, parsed.tenantId</query>
   <earliest>-6mon</earliest>
   <latest>now</latest>
   </search>
@@ -57,9 +57,9 @@ API Usage Dashboard
   </panel>
   <panel>
   <table>
-  <title>Auth Server Prod (non-unique)</title>
+  <title>Auth Server Test (non-unique)</title>
   <search>
-  <query>index="blend*" "env"="prod" "kubernetes.container_name"="auth-server" | stats count by parsed.type, parsed.apiUserId, parsed.tenantId</query>
+  <query>index="blend*" "env"="Test" "kubernetes.container_name"="auth-server" | stats count by parsed.type, parsed.apiUserId, parsed.tenantId</query>
   <earliest>-6mon</earliest>
   <latest>now</latest>
   </search>
@@ -72,7 +72,7 @@ API Usage Dashboard
   <panel>
   <table>
   <search>
-  <query>index="blend-sensitive-prod" "parsed.blendLogType"=authlog OR "parsed.blendLogType"=authLog "whitelisted"=true "parsed.remoteIP"="*" "parsed.code"=success | iplocation parsed.remoteIP | search Country!="United States" | stats count by parsed.tenantId, Country</query>
+  <query>index="blend-sensitive-Test" "parsed.blendLogType"=authlog OR "parsed.blendLogType"=authLog "whitelisted"=true "parsed.remoteIP"="*" "parsed.code"=success | iplocation parsed.remoteIP | search Country!="United States" | stats count by parsed.tenantId, Country</query>
   <earliest>-6mon</earliest>
   <latest>now</latest>
   <sampleRatio>1</sampleRatio>
@@ -89,7 +89,7 @@ API Usage Dashboard
   </row>
  </dashboard>
  -----------------------------------------------------
-This dashboard provides a comprehensive view of API and authentication activities within a production environment:
+This dashboard provides a comprehensive view of API and authentication activities within a Testuction environment:
 1. User Tracking – Measures distinct and total users for Auth Server and API Gateway.
 2. Traffic Analysis – Helps in identifying high-volume API users.
 3. Security Monitoring – Flags non-US authentication attempts that might indicate potential security concerns.
@@ -104,11 +104,11 @@ CP Application Summary
   <fieldset submitButton="false" autoRun="false">
   <input type="dropdown" token="env">
   <label>Filter</label>
-  <choice value="prod">Prod</choice>
+  <choice value="Test">Test</choice>
   <choice value="beta">Beta</choice>
   <choice value="sandbox">Sandbox</choice>
-  <default>prod</default>
-  <initialValue>prod</initialValue>
+  <default>Test</default>
+  <initialValue>Test</initialValue>
   </input>
   <input type="text" token="applicationId" searchWhenChanged="true">
   <label>Application ID</label>
@@ -130,7 +130,7 @@ CP Application Summary
   <fieldForLabel>parsed.tenant</fieldForLabel>
   <fieldForValue>parsed.tenant</fieldForValue>
   <search>
-  <query>env=$env$ kubernetes.container_name=configurable-products Created application | dedup parsed.tenant | table parsed.tenant</query>
+  <query>env=$env$ kubernetes.container_name=configurable-Testucts Created application | dedup parsed.tenant | table parsed.tenant</query>
   <earliest>-24h@h</earliest>
   <latest>now</latest>
   </search>
@@ -141,15 +141,15 @@ CP Application Summary
   <fieldForLabel>parsed.entryPoint</fieldForLabel>
   <fieldForValue>parsed.entryPoint</fieldForValue>
   <search>
-  <query>env=$env$ kubernetes.container_name=configurable-products Created application | dedup parsed.entryPoint | table parsed.entryPoint</query>
+  <query>env=$env$ kubernetes.container_name=configurable-Testucts Created application | dedup parsed.entryPoint | table parsed.entryPoint</query>
   <earliest>-24h@h</earliest>
   <latest>now</latest>
   </search>
   </input>
   <table>
   <search>
-  <query>env=$env$ kubernetes.container_name=configurable-products $tenant$ $entryPoint$ "Created application"
-  | sort -time | table _time parsed.tenant parsed.entryPoint parsed.applicationId parsed.productId parsed.productVersionId</query>
+  <query>env=$env$ kubernetes.container_name=configurable-Testucts $tenant$ $entryPoint$ "Created application"
+  | sort -time | table _time parsed.tenant parsed.entryPoint parsed.applicationId parsed.TestuctId parsed.TestuctVersionId</query>
   <earliest>$time.earliest$</earliest>
   <latest>$time.latest$</latest>
   </search>
@@ -170,8 +170,8 @@ CP Application Summary
   <title>Selected Application</title>
   <table>
   <search>
-  <query>env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Created application"
-  | sort -time | table _time parsed.tenant parsed.entryPoint parsed.applicationId parsed.productId parsed.productVersionId</query>
+  <query>env=$env$ kubernetes.container_name=configurable-Testucts parsed.applicationId=$applicationId$ "Created application"
+  | sort -time | table _time parsed.tenant parsed.entryPoint parsed.applicationId parsed.TestuctId parsed.TestuctVersionId</query>
   <earliest>$time.earliest$</earliest>
   <latest>$time.latest$</latest>
   </search>
@@ -197,8 +197,8 @@ CP Application Summary
   <input type="dropdown" token="serviceFilter" searchWhenChanged="true">
   <label>Services</label>
   <choice value="">All</choice>
-  <choice value="kubernetes.container_name=configurable-products">configurable-products</choice>
-  <choice value="kubernetes.container_name=configurable-products-kafka-consumer">configurable-products-kafka-consumer</choice>
+  <choice value="kubernetes.container_name=configurable-Testucts">configurable-Testucts</choice>
+  <choice value="kubernetes.container_name=configurable-Testucts-kafka-consumer">configurable-Testucts-kafka-consumer</choice>
   <choice value="kubernetes.container_name=home-insurance*">home-insurance</choice>
   <default></default>
   </input>
@@ -231,7 +231,7 @@ CP Application Summary
   </input>
   <table>
   <search>
-  <query>env=$env$ kubernetes.container_name=configurable-products $nodeFilter$ $applicationId$ NOT(parsed.applicationUserId=null) | rex field=parsed.message "(?&lt;action&gt;.*) node instance \((?&lt;nodeInstanceId&gt;.*), (?&lt;nodeName&gt;.*)\)" | sort -time | table _time nodeInstanceId action nodeName parsed.nodeType parsed.dd.trace_id</query>
+  <query>env=$env$ kubernetes.container_name=configurable-Testucts $nodeFilter$ $applicationId$ NOT(parsed.applicationUserId=null) | rex field=parsed.message "(?&lt;action&gt;.*) node instance \((?&lt;nodeInstanceId&gt;.*), (?&lt;nodeName&gt;.*)\)" | sort -time | table _time nodeInstanceId action nodeName parsed.nodeType parsed.dd.trace_id</query>
   <earliest>$time.earliest$</earliest>
   <latest>$time.latest$</latest>
   </search>
@@ -254,7 +254,7 @@ CP Application Summary
   </input>
   <table>
   <search>
-  <query>env=$env$ kubernetes.container_name=configurable-products $nodeFilter$ $applicationId$ parsed.applicationUserId=null | rex field=parsed.message "(?&lt;action&gt;.*) node instance \((?&lt;nodeInstanceId&gt;.*), (?&lt;nodeName&gt;.*)\)" | sort -time | table _time nodeInstanceId action nodeName parsed.nodeType parsed.dd.trace_id</query>
+  <query>env=$env$ kubernetes.container_name=configurable-Testucts $nodeFilter$ $applicationId$ parsed.applicationUserId=null | rex field=parsed.message "(?&lt;action&gt;.*) node instance \((?&lt;nodeInstanceId&gt;.*), (?&lt;nodeName&gt;.*)\)" | sort -time | table _time nodeInstanceId action nodeName parsed.nodeType parsed.dd.trace_id</query>
   <earliest>$time.earliest$</earliest>
   <latest>$time.latest$</latest>
   </search>
@@ -268,10 +268,10 @@ CP Application Summary
   <title>Integration Nodes</title>
   <table>
   <search>
-  <query>env=$env$ kubernetes.container_name=configurable-products IntegrationNodeInstanceRunner "Starting Integration" parsed.applicationId=$applicationId$
+  <query>env=$env$ kubernetes.container_name=configurable-Testucts IntegrationNodeInstanceRunner "Starting Integration" parsed.applicationId=$applicationId$
   | rex field=parsed.message "IntegrationNodeInstanceRunner \[(?&lt;nodeName&gt;.*)\]"
   | join type=outer parsed.nodeInstanceId [
-  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ parsed.message="*Finished running with status*"
+  | search env=$env$ kubernetes.container_name=configurable-Testucts parsed.applicationId=$applicationId$ parsed.message="*Finished running with status*"
   | rex field=parsed.message "Finished running with status - (?&lt;status&gt;[^ ]*)"
   | rename status AS runStatus
   | table parsed.nodeInstanceId runStatus parsed.duration parsed.errorMessage parsed.statusCode
@@ -317,36 +317,36 @@ CP Application Summary
   <title>Integration Nodes</title>
   <table>
   <search>
-  <query>env=$env$ kubernetes.container_name=configurable-products IntegrationNodeInstanceRunner "Starting Integration" parsed.applicationId=$applicationId$
+  <query>env=$env$ kubernetes.container_name=configurable-Testucts IntegrationNodeInstanceRunner "Starting Integration" parsed.applicationId=$applicationId$
   | rex field=parsed.message "IntegrationNodeInstanceRunner \[(?&lt;nodeName&gt;.*)\]"
   | join type=outer parsed.nodeInstanceId [
-  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Request body transformed"
+  | search env=$env$ kubernetes.container_name=configurable-Testucts parsed.applicationId=$applicationId$ "Request body transformed"
   | eval requestBodyTransformed = "Yes"
   | table parsed.nodeInstanceId requestBodyTransformed
   ]
   | join type=outer parsed.nodeInstanceId [
-  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Sending request to product-boundary"
+  | search env=$env$ kubernetes.container_name=configurable-Testucts parsed.applicationId=$applicationId$ "Sending request to Testuct-boundary"
   | eval sentToPBS = "Yes"
   | table parsed.nodeInstanceId sentToPBS
   ]
   | join type=outer parsed.nodeInstanceId [
-  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Received response from product-boundary"
+  | search env=$env$ kubernetes.container_name=configurable-Testucts parsed.applicationId=$applicationId$ "Received response from Testuct-boundary"
   | eval responseFromPBS = "Yes"
-  | rex field=parsed.message "Received response from product-boundary (?&lt;reqStatusCode&gt;.*)"
+  | rex field=parsed.message "Received response from Testuct-boundary (?&lt;reqStatusCode&gt;.*)"
   | table parsed.nodeInstanceId responseFromPBS reqStatusCode parsed.duration
   ]
   | join type=outer parsed.nodeInstanceId [
-  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Response body transformed"
+  | search env=$env$ kubernetes.container_name=configurable-Testucts parsed.applicationId=$applicationId$ "Response body transformed"
   | eval responseBodyTransformed = "Yes"
   | table parsed.nodeInstanceId responseBodyTransformed
   ]
   | join type=outer parsed.nodeInstanceId [
-  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ "Application data saved"
+  | search env=$env$ kubernetes.container_name=configurable-Testucts parsed.applicationId=$applicationId$ "Application data saved"
   | eval dataSaved = "Yes"
   | table parsed.nodeInstanceId dataSaved
   ]
   | join type=outer parsed.nodeInstanceId [
-  | search env=$env$ kubernetes.container_name=configurable-products parsed.applicationId=$applicationId$ parsed.message="*Error during integration*"
+  | search env=$env$ kubernetes.container_name=configurable-Testucts parsed.applicationId=$applicationId$ parsed.message="*Error during integration*"
   | eval err = "Yes"
   | table parsed.nodeInstanceId err
   ]
@@ -387,7 +387,7 @@ CP Application Summary
   <title>Beehive Events</title>
   <table>
   <search>
-  <query>env=$env$ kubernetes.container_name=configurable-products sent event $applicationId$ | sort -time | table _time parsed.message parsed.dd.trace_id</query>
+  <query>env=$env$ kubernetes.container_name=configurable-Testucts sent event $applicationId$ | sort -time | table _time parsed.message parsed.dd.trace_id</query>
   <earliest>$time.earliest$</earliest>
   <latest>$time.latest$</latest>
   </search>
@@ -452,11 +452,11 @@ CP Application Summary
   </input>
   <input type="multiselect" token="env">
   <label>Environments</label>
-  <choice value="prod">prod</choice>
+  <choice value="Test">Test</choice>
   <choice value="beta">beta</choice>
   <choice value="sandbox">sandbox</choice>
-  <default>prod</default>
-  <initialValue>prod</initialValue>
+  <default>Test</default>
+  <initialValue>Test</initialValue>
   </input>
   <input type="multiselect" token="tenants">
   <label>Tenants</label>
